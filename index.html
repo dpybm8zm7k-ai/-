@@ -1,0 +1,2565 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<meta
+    name="theme-color"
+    content="#080808"
+>
+
+<title>VISITOR COUNTER</title>
+
+
+<!-- =====================================================
+     FIREBASE
+===================================================== -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+
+<style>
+
+/* =====================================================
+   BASIC
+===================================================== */
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #080808;
+    color: white;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+body {
+    padding: 20px;
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+.title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+
+/* =====================================================
+   CONNECTION
+===================================================== */
+
+.connection {
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.connection.online {
+    color: #55dd77;
+}
+
+.connection.offline {
+    color: #ff5555;
+}
+
+
+/* =====================================================
+   TOTAL
+===================================================== */
+
+.total-card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 18px;
+    padding: 30px 20px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.total-label {
+    font-size: 20px;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.total-number {
+    font-size: 82px;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.total-unit {
+    font-size: 24px;
+    color: #aaa;
+    margin-top: 8px;
+}
+
+
+/* =====================================================
+   GRID
+===================================================== */
+
+.top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 18px;
+    padding: 20px;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+
+/* =====================================================
+   STAFF
+===================================================== */
+
+.staff-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.staff-button {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid #444;
+    border-radius: 14px;
+    background: #181818;
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.staff-button:active {
+    transform: scale(0.98);
+}
+
+.staff-button.active {
+    border-color: white;
+    background: #292929;
+}
+
+.staff-info {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #181818;
+    color: #aaa;
+    text-align: center;
+    min-height: 45px;
+}
+
+
+/* =====================================================
+   MANUAL
+===================================================== */
+
+.manual-number {
+    width: 100%;
+    height: 55px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    background: #080808;
+    color: white;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.manual-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.manual-button {
+    height: 55px;
+    border: 1px solid #444;
+    border-radius: 10px;
+    background: #1a1a1a;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.manual-button:active {
+    transform: scale(0.98);
+}
+
+
+/* =====================================================
+   GRAPH
+===================================================== */
+
+.graph-card {
+    margin-bottom: 20px;
+}
+
+.graph-wrapper {
+    position: relative;
+    width: 100%;
+    height: 400px;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+.date-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.date-input {
+    flex: 1;
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #080808;
+    color: white;
+    padding: 0 10px;
+    font-size: 16px;
+}
+
+
+/* =====================================================
+   LOG
+===================================================== */
+
+.log-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.log-item {
+    display: grid;
+    grid-template-columns: 100px 1fr 80px;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 5px;
+    border-bottom: 1px solid #292929;
+}
+
+.log-time {
+    color: #888;
+    font-size: 13px;
+}
+
+.log-description {
+    font-size: 14px;
+}
+
+.log-number {
+    text-align: right;
+    font-weight: 700;
+}
+
+.plus {
+    color: #66dd88;
+}
+
+.minus {
+    color: #ff7777;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.status-box {
+    background: #181818;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+}
+
+.status-label {
+    color: #888;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.status-value {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 700px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .title {
+        font-size: 25px;
+    }
+
+    .top-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .total-number {
+        font-size: 64px;
+    }
+
+    .graph-wrapper {
+        height: 300px;
+    }
+
+    .log-item {
+        grid-template-columns: 70px 1fr 60px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <!-- =================================================
+         TITLE
+    ================================================== -->
+
+    <div class="title">
+        VISITOR COUNTER
+    </div>
+
+
+    <!-- =================================================
+         CONNECTION
+    ================================================== -->
+
+    <div
+        id="connection"
+        class="connection"
+    >
+        Firebase接続確認中...
+    </div>
+
+
+    <!-- =================================================
+         TOTAL
+    ================================================== -->
+
+    <div class="total-card">
+
+        <div class="total-label">
+            本日の合計来場者数
+        </div>
+
+        <div
+            id="totalVisitors"
+            class="total-number"
+        >
+            0
+        </div>
+
+        <div class="total-unit">
+            人
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         STAFF / MANUAL
+    ================================================== -->
+
+    <div class="top-grid">
+
+
+        <!-- STAFF -->
+
+        <div class="card">
+
+            <div class="card-title">
+                ダーツディーラー
+            </div>
+
+            <div class="staff-row">
+
+                <button
+                    class="staff-button"
+                    id="staffAButton"
+                    onclick="selectStaff('A')"
+                >
+                    スタッフA
+                </button>
+
+                <button
+                    class="staff-button"
+                    id="staffBButton"
+                    onclick="selectStaff('B')"
+                >
+                    スタッフB
+                </button>
+
+            </div>
+
+            <div
+                id="staffInfo"
+                class="staff-info"
+            >
+                スタッフを選択してください
+            </div>
+
+        </div>
+
+
+        <!-- MANUAL -->
+
+        <div class="card">
+
+            <div class="card-title">
+                来場者数 手動変更
+            </div>
+
+            <input
+                id="manualNumber"
+                class="manual-number"
+                type="number"
+                min="1"
+                value="1"
+            >
+
+            <div class="manual-buttons">
+
+                <button
+                    class="manual-button"
+                    onclick="manualChange(1)"
+                >
+                    ＋ 加算
+                </button>
+
+                <button
+                    class="manual-button"
+                    onclick="manualChange(-1)"
+                >
+                    − 減算
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         STATUS
+    ================================================== -->
+
+    <div class="card graph-card">
+
+        <div class="card-title">
+            現在の状況
+        </div>
+
+        <div class="status-grid">
+
+            <div class="status-box">
+
+                <div class="status-label">
+                    現在の来場者数
+                </div>
+
+                <div
+                    id="statusTotal"
+                    class="status-value"
+                >
+                    0人
+                </div>
+
+            </div>
+
+
+            <div class="status-box">
+
+                <div class="status-label">
+                    本日の自動加算回数
+                </div>
+
+                <div
+                    id="automaticCount"
+                    class="status-value"
+                >
+                    0回
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         GRAPH
+    ================================================== -->
+
+    <div class="card graph-card">
+
+        <div class="card-title">
+            入場者数の推移
+        </div>
+
+        <div class="date-row">
+
+            <input
+                id="graphDate"
+                class="date-input"
+                type="date"
+                onchange="loadGraphDate()"
+            >
+
+        </div>
+
+        <div class="graph-wrapper">
+
+            <canvas id="visitorGraph"></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         LOG
+    ================================================== -->
+
+    <div class="card">
+
+        <div class="card-title">
+            来場者数変更ログ
+        </div>
+
+        <div
+            id="logList"
+            class="log-list"
+        >
+            ログを読み込んでいます...
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   FIREBASE CONFIG
+===================================================== */
+
+/*
+    ここだけ、自分のFirebaseプロジェクトの
+    Firebase Configに置き換えてください。
+*/
+
+const firebaseConfig = {
+
+    apiKey: "YOUR_API_KEY",
+
+    authDomain:
+        "YOUR_PROJECT.firebaseapp.com",
+
+    databaseURL:
+        "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+
+    projectId:
+        "YOUR_PROJECT",
+
+    storageBucket:
+        "YOUR_PROJECT.firebasestorage.app",
+
+    messagingSenderId:
+        "YOUR_MESSAGING_SENDER_ID",
+
+    appId:
+        "YOUR_APP_ID"
+
+};
+
+
+/* =====================================================
+   FIREBASE INITIALIZE
+===================================================== */
+
+firebase.initializeApp(firebaseConfig);
+
+const database =
+    firebase.database();
+
+
+/* =====================================================
+   DATA PATH
+===================================================== */
+
+/*
+    既存のDARTS SYSTEMとは完全に分離した
+    新サイト専用データ領域です。
+
+    visitorCounter
+        └── 2026-09-17
+              ├── total
+              ├── automaticCount
+              ├── hourly
+              └── logs
+*/
+
+const ROOT_PATH =
+    "visitorCounter";
+
+
+/* =====================================================
+   DARTS STAFF DATA PATH
+===================================================== */
+
+/*
+    既存DARTS SYSTEM側のスタッフデータを
+    読み取る場所です。
+
+    既存システムのデータ構造に合わせて
+    必要ならここだけ変更してください。
+
+    A → staffs/A
+    B → staffs/B
+*/
+
+const STAFF_DATA_PATH = {
+
+    A: "staffs/A",
+
+    B: "staffs/B"
+
+};
+
+
+/* =====================================================
+   DARTS BOARD SELECTION PATH
+===================================================== */
+
+/*
+    ダーツボードごとに誰が選択されているかを
+    Firebaseから監視します。
+
+    この新サイトは既存DARTS SYSTEMとは
+    別サイトですが、Firebaseを通して
+    選択状態だけを読み取れます。
+*/
+
+const BOARD_SELECTION_PATH = {
+
+    board1:
+        "dartsStaffSelection/board1",
+
+    board2:
+        "dartsStaffSelection/board2"
+
+};
+
+
+/* =====================================================
+   STATE
+===================================================== */
+
+let currentTotal = 0;
+
+let automaticCount = 0;
+
+let currentStaff = null;
+
+let graphData = {};
+
+let logsData = {};
+
+let previousBoardStaff = {
+
+    board1: null,
+
+    board2: null
+
+};
+
+
+/* =====================================================
+   JAPAN TIME
+===================================================== */
+
+function getJapanDate() {
+
+    const now =
+        new Date();
+
+    return new Intl.DateTimeFormat(
+        "en-CA",
+        {
+            timeZone:
+                "Asia/Tokyo",
+            year:
+                "numeric",
+            month:
+                "2-digit",
+            day:
+                "2-digit"
+        }
+    ).format(now);
+
+}
+
+
+function getJapanTime() {
+
+    const now =
+        new Date();
+
+    return new Intl.DateTimeFormat(
+        "ja-JP",
+        {
+            timeZone:
+                "Asia/Tokyo",
+            hour:
+                "2-digit",
+            minute:
+                "2-digit",
+            second:
+                "2-digit",
+            hour12:
+                false
+        }
+    ).format(now);
+
+}
+
+
+function getJapanHour() {
+
+    const now =
+        new Date();
+
+    const parts =
+        new Intl.DateTimeFormat(
+            "ja-JP",
+            {
+                timeZone:
+                    "Asia/Tokyo",
+                hour:
+                    "2-digit",
+                hour12:
+                    false
+            }
+        ).formatToParts(now);
+
+    const hourPart =
+        parts.find(
+            p => p.type === "hour"
+        );
+
+    return Number(
+        hourPart.value
+    );
+
+}
+
+
+/* =====================================================
+   TODAY PATH
+===================================================== */
+
+function getTodayPath() {
+
+    return ROOT_PATH +
+        "/" +
+        getJapanDate();
+
+}
+
+
+/* =====================================================
+   INITIALIZE DAY
+===================================================== */
+
+async function initializeDay() {
+
+    const path =
+        getTodayPath();
+
+    const snapshot =
+        await database
+            .ref(path)
+            .once("value");
+
+    if (!snapshot.exists()) {
+
+        await database
+            .ref(path)
+            .set({
+
+                total: 0,
+
+                automaticCount: 0,
+
+                hourly: {
+
+                    "08": 0,
+                    "09": 0,
+                    "10": 0,
+                    "11": 0,
+                    "12": 0,
+                    "13": 0,
+                    "14": 0,
+                    "15": 0,
+                    "16": 0,
+                    "17": 0
+
+                },
+
+                logs: {}
+
+            });
+
+    }
+
+}
+
+
+/* =====================================================
+   REALTIME TOTAL
+===================================================== */
+
+function listenTotal() {
+
+    database
+        .ref(
+            getTodayPath() +
+            "/total"
+        )
+        .on(
+            "value",
+            snapshot => {
+
+                currentTotal =
+                    Number(
+                        snapshot.val() || 0
+                    );
+
+                updateTotalDisplay();
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   AUTOMATIC COUNT
+===================================================== */
+
+function listenAutomaticCount() {
+
+    database
+        .ref(
+            getTodayPath() +
+            "/automaticCount"
+        )
+        .on(
+            "value",
+            snapshot => {
+
+                automaticCount =
+                    Number(
+                        snapshot.val() || 0
+                    );
+
+                document
+                    .getElementById(
+                        "automaticCount"
+                    )
+                    .textContent =
+                        automaticCount +
+                        "回";
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   TOTAL DISPLAY
+===================================================== */
+
+function updateTotalDisplay() {
+
+    document
+        .getElementById(
+            "totalVisitors"
+        )
+        .textContent =
+            currentTotal;
+
+    document
+        .getElementById(
+            "statusTotal"
+        )
+        .textContent =
+            currentTotal +
+            "人";
+
+}
+
+
+/* =====================================================
+   GET STAFF PLAYER COUNT
+===================================================== */
+
+function getPlayerCount(data) {
+
+    if (!data) {
+
+        return 0;
+
+    }
+
+
+    /*
+        形式1
+
+        {
+            playerCount: 5
+        }
+    */
+
+    if (
+        typeof data.playerCount ===
+        "number"
+    ) {
+
+        return data.playerCount;
+
+    }
+
+
+    /*
+        形式2
+
+        {
+            players: [
+                {...},
+                {...}
+            ]
+        }
+    */
+
+    if (
+        Array.isArray(
+            data.players
+        )
+    ) {
+
+        return data.players.length;
+
+    }
+
+
+    /*
+        形式3
+
+        {
+            players: {
+                player1: {...},
+                player2: {...}
+            }
+        }
+    */
+
+    if (
+        data.players &&
+        typeof data.players ===
+            "object"
+    ) {
+
+        return Object.keys(
+            data.players
+        ).length;
+
+    }
+
+
+    /*
+        形式4
+
+        スタッフデータそのものが
+        プレイヤー一覧の場合
+    */
+
+    if (
+        typeof data ===
+            "object"
+    ) {
+
+        const keys =
+            Object.keys(data);
+
+        const ignoredKeys = [
+
+            "name",
+            "staffName",
+            "coin",
+            "coins",
+            "balance",
+            "settings",
+            "rules",
+            "playerCount"
+
+        ];
+
+        const playerKeys =
+            keys.filter(
+                key =>
+                    !ignoredKeys.includes(
+                        key
+                    )
+            );
+
+        /*
+            明らかにプレイヤーデータが
+            入っている場合のみ使用
+        */
+
+        if (
+            playerKeys.length > 0
+        ) {
+
+            return playerKeys.length;
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* =====================================================
+   READ STAFF
+===================================================== */
+
+async function getStaffPlayerCount(
+    staff
+) {
+
+    const path =
+        STAFF_DATA_PATH[staff];
+
+    if (!path) {
+
+        return 0;
+
+    }
+
+    const snapshot =
+        await database
+            .ref(path)
+            .once("value");
+
+    return getPlayerCount(
+        snapshot.val()
+    );
+
+}
+
+
+/* =====================================================
+   SELECT STAFF
+===================================================== */
+
+async function selectStaff(
+    staff
+) {
+
+    const info =
+        document.getElementById(
+            "staffInfo"
+        );
+
+    info.textContent =
+        "スタッフ" +
+        staff +
+        "の人数を確認中...";
+
+
+    /*
+        同じスタッフを連続選択しても
+        二重加算しない
+    */
+
+    if (
+        currentStaff === staff
+    ) {
+
+        info.textContent =
+            "スタッフ" +
+            staff +
+            "は選択済みです";
+
+        return;
+
+    }
+
+
+    try {
+
+        const playerCount =
+            await getStaffPlayerCount(
+                staff
+            );
+
+
+        if (
+            playerCount <= 0
+        ) {
+
+            info.textContent =
+                "スタッフ" +
+                staff +
+                "：登録プレイヤー0人";
+
+            currentStaff =
+                staff;
+
+            updateStaffButtons();
+
+            return;
+
+        }
+
+
+        /*
+            来場者数を加算
+        */
+
+        await addVisitors(
+
+            playerCount,
+
+            "自動加算：スタッフ" +
+            staff +
+            "を選択（" +
+            playerCount +
+            "人）",
+
+            "automatic"
+
+        );
+
+
+        currentStaff =
+            staff;
+
+        updateStaffButtons();
+
+
+        info.textContent =
+            "スタッフ" +
+            staff +
+            "：登録プレイヤー" +
+            playerCount +
+            "人を加算";
+
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        info.textContent =
+            "スタッフ情報の取得に失敗しました";
+
+    }
+
+}
+
+
+/* =====================================================
+   STAFF BUTTON DISPLAY
+===================================================== */
+
+function updateStaffButtons() {
+
+    document
+        .getElementById(
+            "staffAButton"
+        )
+        .classList.toggle(
+            "active",
+            currentStaff === "A"
+        );
+
+    document
+        .getElementById(
+            "staffBButton"
+        )
+        .classList.toggle(
+            "active",
+            currentStaff === "B"
+        );
+
+}
+
+
+/* =====================================================
+   ADD VISITORS
+===================================================== */
+
+async function addVisitors(
+    amount,
+    description,
+    type
+) {
+
+    amount =
+        Number(amount);
+
+    if (
+        !Number.isFinite(amount) ||
+        amount === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const dayRef =
+        database.ref(
+            getTodayPath()
+        );
+
+
+    /*
+        Firebase transactionを使用することで
+        複数端末から同時に変更されても
+        人数が上書きされないようにする
+    */
+
+    await dayRef
+        .child("total")
+        .transaction(
+            current => {
+
+                return (
+                    Number(
+                        current || 0
+                    ) +
+                    amount
+                );
+
+            }
+        );
+
+
+    /*
+        時間帯別データ
+
+        08〜17時のみ記録
+    */
+
+    const hour =
+        getJapanHour();
+
+
+    if (
+        hour >= 8 &&
+        hour <= 17
+    ) {
+
+        const hourKey =
+            String(hour)
+                .padStart(
+                    2,
+                    "0"
+                );
+
+        await dayRef
+            .child(
+                "hourly/" +
+                hourKey
+            )
+            .transaction(
+                current => {
+
+                    return (
+                        Number(
+                            current || 0
+                        ) +
+                        amount
+                    );
+
+                }
+            );
+
+    }
+
+
+    /*
+        自動加算回数
+    */
+
+    if (
+        type === "automatic"
+    ) {
+
+        await dayRef
+            .child(
+                "automaticCount"
+            )
+            .transaction(
+                current => {
+
+                    return (
+                        Number(
+                            current || 0
+                        ) +
+                        1
+                    );
+
+                }
+            );
+
+    }
+
+
+    /*
+        ログ
+    */
+
+    const logRef =
+        dayRef
+            .child("logs")
+            .push();
+
+
+    await logRef.set({
+
+        timestamp:
+            firebase.database.ServerValue.TIMESTAMP,
+
+        time:
+            getJapanTime(),
+
+        amount:
+            amount,
+
+        type:
+            type,
+
+        description:
+            description
+
+    });
+
+}
+
+
+/* =====================================================
+   MANUAL CHANGE
+===================================================== */
+
+async function manualChange(
+    direction
+) {
+
+    const input =
+        document.getElementById(
+            "manualNumber"
+        );
+
+    const amount =
+        Number(
+            input.value
+        );
+
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+
+        return;
+
+    }
+
+
+    const change =
+        amount *
+        direction;
+
+
+    /*
+        減算時に0未満にならないようにする
+    */
+
+    const totalSnapshot =
+        await database
+            .ref(
+                getTodayPath() +
+                "/total"
+            )
+            .once("value");
+
+    const total =
+        Number(
+            totalSnapshot.val() ||
+            0
+        );
+
+
+    if (
+        change < 0 &&
+        total + change < 0
+    ) {
+
+        alert(
+            "来場者数は0人未満にはできません。"
+        );
+
+        return;
+
+    }
+
+
+    const description =
+        direction > 0
+
+            ? "手動加算：" +
+              amount +
+              "人"
+
+            : "手動減算：" +
+              amount +
+              "人";
+
+
+    await addVisitors(
+
+        change,
+
+        description,
+
+        "manual"
+
+    );
+
+}
+
+
+/* =====================================================
+   GRAPH
+===================================================== */
+
+function setupGraphDate() {
+
+    const input =
+        document.getElementById(
+            "graphDate"
+        );
+
+    input.value =
+        getJapanDate();
+
+}
+
+
+async function loadGraphDate() {
+
+    const date =
+        document
+            .getElementById(
+                "graphDate"
+            )
+            .value;
+
+    if (!date) {
+
+        return;
+
+    }
+
+
+    const snapshot =
+        await database
+            .ref(
+                ROOT_PATH +
+                "/" +
+                date +
+                "/hourly"
+            )
+            .once("value");
+
+
+    graphData =
+        snapshot.val() ||
+        {};
+
+    drawGraph();
+
+}
+
+
+/* =====================================================
+   DRAW GRAPH
+===================================================== */
+
+function drawGraph() {
+
+    const canvas =
+        document.getElementById(
+            "visitorGraph"
+        );
+
+    const wrapper =
+        canvas.parentElement;
+
+    const width =
+        wrapper.clientWidth;
+
+    const height =
+        wrapper.clientHeight;
+
+
+    const dpr =
+        window.devicePixelRatio ||
+        1;
+
+
+    canvas.width =
+        width * dpr;
+
+    canvas.height =
+        height * dpr;
+
+    canvas.style.width =
+        width + "px";
+
+    canvas.style.height =
+        height + "px";
+
+
+    const ctx =
+        canvas.getContext(
+            "2d"
+        );
+
+    ctx.scale(
+        dpr,
+        dpr
+    );
+
+
+    /*
+        グラフ領域
+    */
+
+    const left =
+        55;
+
+    const right =
+        20;
+
+    const top =
+        25;
+
+    const bottom =
+        45;
+
+
+    const graphWidth =
+        width -
+        left -
+        right;
+
+    const graphHeight =
+        height -
+        top -
+        bottom;
+
+
+    const hours = [
+
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17"
+
+    ];
+
+
+    const values =
+        hours.map(
+            hour =>
+                Number(
+                    graphData[hour] ||
+                    0
+                )
+        );
+
+
+    const maxValue =
+        Math.max(
+            ...values,
+            1
+        );
+
+
+    /*
+        上限を少し余裕を持たせる
+    */
+
+    const graphMax =
+        Math.ceil(
+            maxValue / 5
+        ) * 5;
+
+
+    /*
+        背景
+    */
+
+    ctx.fillStyle =
+        "#111";
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /*
+        横線
+    */
+
+    ctx.strokeStyle =
+        "#333";
+
+    ctx.lineWidth =
+        1;
+
+    ctx.font =
+        "12px sans-serif";
+
+    ctx.fillStyle =
+        "#888";
+
+    const divisions =
+        5;
+
+
+    for (
+        let i = 0;
+        i <= divisions;
+        i++
+    ) {
+
+        const y =
+            top +
+            graphHeight *
+            (
+                i /
+                divisions
+            );
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            left,
+            y
+        );
+
+        ctx.lineTo(
+            width -
+            right,
+            y
+        );
+
+        ctx.stroke();
+
+
+        const label =
+            Math.round(
+                graphMax *
+                (
+                    1 -
+                    i /
+                    divisions
+                )
+            );
+
+
+        ctx.fillText(
+            String(label),
+            10,
+            y + 4
+        );
+
+    }
+
+
+    /*
+        縦軸・横軸
+    */
+
+    ctx.strokeStyle =
+        "#666";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        left,
+        top
+    );
+
+    ctx.lineTo(
+        left,
+        height -
+        bottom
+    );
+
+    ctx.lineTo(
+        width -
+        right,
+        height -
+        bottom
+    );
+
+    ctx.stroke();
+
+
+    /*
+        X軸ラベル
+    */
+
+    ctx.fillStyle =
+        "#aaa";
+
+    ctx.textAlign =
+        "center";
+
+    hours.forEach(
+        (
+            hour,
+            index
+        ) => {
+
+            const x =
+                left +
+                graphWidth *
+                (
+                    index /
+                    (
+                        hours.length -
+                        1
+                    )
+                );
+
+
+            ctx.fillText(
+                hour + ":00",
+                x,
+                height -
+                18
+            );
+
+        }
+    );
+
+
+    /*
+        折線
+    */
+
+    ctx.strokeStyle =
+        "#ffffff";
+
+    ctx.lineWidth =
+        3;
+
+    ctx.beginPath();
+
+
+    values.forEach(
+        (
+            value,
+            index
+        ) => {
+
+            const x =
+                left +
+                graphWidth *
+                (
+                    index /
+                    (
+                        values.length -
+                        1
+                    )
+                );
+
+
+            const y =
+                top +
+                graphHeight *
+                (
+                    1 -
+                    value /
+                    graphMax
+                );
+
+
+            if (
+                index === 0
+            ) {
+
+                ctx.moveTo(
+                    x,
+                    y
+                );
+
+            }
+            else {
+
+                ctx.lineTo(
+                    x,
+                    y
+                );
+
+            }
+
+        }
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+        点
+    */
+
+    values.forEach(
+        (
+            value,
+            index
+        ) => {
+
+            const x =
+                left +
+                graphWidth *
+                (
+                    index /
+                    (
+                        values.length -
+                        1
+                    )
+                );
+
+
+            const y =
+                top +
+                graphHeight *
+                (
+                    1 -
+                    value /
+                    graphMax
+                );
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x,
+                y,
+                5,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "#ffffff";
+
+            ctx.fill();
+
+
+            /*
+                数値
+            */
+
+            ctx.fillStyle =
+                "#ffffff";
+
+            ctx.font =
+                "12px sans-serif";
+
+            ctx.textAlign =
+                "center";
+
+            ctx.fillText(
+                String(value),
+                x,
+                y - 10
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   REALTIME GRAPH
+===================================================== */
+
+function listenGraph() {
+
+    const date =
+        document
+            .getElementById(
+                "graphDate"
+            )
+            .value;
+
+
+    database
+        .ref(
+            ROOT_PATH +
+            "/" +
+            date +
+            "/hourly"
+        )
+        .on(
+            "value",
+            snapshot => {
+
+                graphData =
+                    snapshot.val() ||
+                    {};
+
+                drawGraph();
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   LOGS
+===================================================== */
+
+function listenLogs() {
+
+    database
+        .ref(
+            getTodayPath() +
+            "/logs"
+        )
+        .on(
+            "value",
+            snapshot => {
+
+                logsData =
+                    snapshot.val() ||
+                    {};
+
+                renderLogs();
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   RENDER LOGS
+===================================================== */
+
+function renderLogs() {
+
+    const container =
+        document.getElementById(
+            "logList"
+        );
+
+
+    const logs =
+        Object.values(
+            logsData
+        );
+
+
+    logs.sort(
+        (
+            a,
+            b
+        ) =>
+            Number(
+                b.timestamp || 0
+            ) -
+            Number(
+                a.timestamp || 0
+            )
+    );
+
+
+    if (
+        logs.length === 0
+    ) {
+
+        container.textContent =
+            "変更ログはありません";
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    logs.forEach(
+        log => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "log-item";
+
+
+            const time =
+                document.createElement(
+                    "div"
+                );
+
+            time.className =
+                "log-time";
+
+            time.textContent =
+                log.time ||
+                "";
+
+
+            const description =
+                document.createElement(
+                    "div"
+                );
+
+            description.className =
+                "log-description";
+
+            description.textContent =
+                log.description ||
+                "";
+
+
+            const number =
+                document.createElement(
+                    "div"
+                );
+
+            number.className =
+                "log-number";
+
+
+            const amount =
+                Number(
+                    log.amount ||
+                    0
+                );
+
+
+            if (
+                amount >= 0
+            ) {
+
+                number.classList.add(
+                    "plus"
+                );
+
+                number.textContent =
+                    "+" +
+                    amount +
+                    "人";
+
+            }
+            else {
+
+                number.classList.add(
+                    "minus"
+                );
+
+                number.textContent =
+                    amount +
+                    "人";
+
+            }
+
+
+            item.appendChild(
+                time
+            );
+
+            item.appendChild(
+                description
+            );
+
+            item.appendChild(
+                number
+            );
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   BOARD STAFF MONITOR
+===================================================== */
+
+function listenBoardSelection(
+    boardName
+) {
+
+    const path =
+        BOARD_SELECTION_PATH[
+            boardName
+        ];
+
+
+    if (!path) {
+
+        return;
+
+    }
+
+
+    database
+        .ref(path)
+        .on(
+            "value",
+            async snapshot => {
+
+                const data =
+                    snapshot.val();
+
+
+                let staff =
+                    null;
+
+
+                /*
+                    staff
+                */
+
+                if (
+                    data &&
+                    typeof data.staff ===
+                        "string"
+                ) {
+
+                    staff =
+                        normalizeStaff(
+                            data.staff
+                        );
+
+                }
+
+
+                /*
+                    selectedStaff
+                */
+
+                if (
+                    !staff &&
+                    data &&
+                    typeof data.selectedStaff ===
+                        "string"
+                ) {
+
+                    staff =
+                        normalizeStaff(
+                            data.selectedStaff
+                        );
+
+                }
+
+
+                /*
+                    staffId
+                */
+
+                if (
+                    !staff &&
+                    data &&
+                    typeof data.staffId ===
+                        "string"
+                ) {
+
+                    staff =
+                        normalizeStaff(
+                            data.staffId
+                        );
+
+                }
+
+
+                /*
+                    以前の状態
+                */
+
+                const previous =
+                    previousBoardStaff[
+                        boardName
+                    ];
+
+
+                /*
+                    スタッフが未選択から
+                    選択された場合だけ加算
+                */
+
+                if (
+                    staff &&
+                    staff !== previous
+                ) {
+
+                    const playerCount =
+                        await getStaffPlayerCount(
+                            staff
+                        );
+
+
+                    if (
+                        playerCount > 0
+                    ) {
+
+                        await addVisitors(
+
+                            playerCount,
+
+                            boardName +
+                            "：スタッフ" +
+                            staff +
+                            "選択（" +
+                            playerCount +
+                            "人）",
+
+                            "automatic"
+
+                        );
+
+                    }
+
+                }
+
+
+                previousBoardStaff[
+                    boardName
+                ] =
+                    staff;
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   NORMALIZE STAFF
+===================================================== */
+
+function normalizeStaff(
+    value
+) {
+
+    if (!value) {
+
+        return null;
+
+    }
+
+
+    const text =
+        String(
+            value
+        )
+        .trim()
+        .toUpperCase();
+
+
+    if (
+        text === "A" ||
+        text === "STAFFA" ||
+        text === "スタッフA"
+    ) {
+
+        return "A";
+
+    }
+
+
+    if (
+        text === "B" ||
+        text === "STAFFB" ||
+        text === "スタッフB"
+    ) {
+
+        return "B";
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =====================================================
+   FIREBASE CONNECTION
+===================================================== */
+
+function listenConnection() {
+
+    database
+        .ref(".info/connected")
+        .on(
+            "value",
+            snapshot => {
+
+                const connected =
+                    snapshot.val() ===
+                    true;
+
+
+                const element =
+                    document
+                        .getElementById(
+                            "connection"
+                        );
+
+
+                if (
+                    connected
+                ) {
+
+                    element.textContent =
+                        "Firebase接続中";
+
+                    element.className =
+                        "connection online";
+
+                }
+                else {
+
+                    element.textContent =
+                        "Firebase未接続";
+
+                    element.className =
+                        "connection offline";
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   WINDOW RESIZE
+===================================================== */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        drawGraph();
+
+    }
+);
+
+
+/* =====================================================
+   INITIALIZE
+===================================================== */
+
+async function initialize() {
+
+    try {
+
+        setupGraphDate();
+
+        await initializeDay();
+
+        listenConnection();
+
+        listenTotal();
+
+        listenAutomaticCount();
+
+        listenLogs();
+
+        listenGraph();
+
+        /*
+            2台のダーツボードを監視
+        */
+
+        listenBoardSelection(
+            "board1"
+        );
+
+        listenBoardSelection(
+            "board2"
+        );
+
+
+        await loadGraphDate();
+
+
+        /*
+            スタッフボタンの初期状態
+        */
+
+        updateStaffButtons();
+
+
+    }
+    catch (error) {
+
+        console.error(error);
+
+        document
+            .getElementById(
+                "connection"
+            )
+            .textContent =
+                "Firebase初期化エラー";
+
+    }
+
+}
+
+
+initialize();
+
+</script>
+
+
+</body>
+
+</html>
